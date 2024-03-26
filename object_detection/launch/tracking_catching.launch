@@ -1,0 +1,32 @@
+<launch>
+    <arg name="ip"/>
+    <arg name="node_start_delay" default="2.0" />
+    <arg name="username"/>
+    <arg name="password"/>
+
+    <!-- Start the driver -->
+    <include file="$(find kortex_driver)/launch/kortex_driver.launch">
+        <arg name="ip_address" value="$(arg ip)"/>
+        <arg name="dof" value="6"/>
+        <arg name="gripper" value="robotiq_2f_85"/>
+        <arg name="vision" value="true"/>
+        <arg name="start_rviz" value="false"/>
+        <arg name="username" value="$(arg username)"/>
+        <arg name="password" value="$(arg password)"/>
+    </include>
+
+    <!-- Start the vision module -->
+    <include file="$(find kinova_vision)/launch/kinova_vision.launch">
+        <arg name="device" value="$(arg ip)"/>
+    </include>
+
+    <!-- Start the tracking -->
+    <node name="object_tracker" pkg="object_detection" type="object_tracker_node.py" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' "/>
+    
+    <!-- Visual -->
+    <node name="rqt_gui" pkg="rqt_gui" type="rqt_gui"/>
+
+    <node name="object_catcher" pkg="object_detection" type="object_catcher_node.py" ns="/my_gen3" launch-prefix="bash -c 'sleep $(arg node_start_delay); $0 $@' "/>
+
+
+</launch>
